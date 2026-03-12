@@ -9,8 +9,7 @@ import { SearchBar } from "@/components/layout/SearchBar";
 import { ArrowUpRight, ArrowDownRight, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BulkDownload } from "@/components/screener/BulkDownload";
-
-
+import { MarketNews } from "@/components/dashboard/MarketNews";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -91,6 +90,11 @@ export default function DashboardPage() {
             </h2>
           </div>
           <StockCarousel />
+        </section>
+
+        {/* Market News */}
+        <section className="mt-4">
+          <MarketNews />
         </section>
 
         {/* Bulk CSV Download */}

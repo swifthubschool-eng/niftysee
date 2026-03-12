@@ -96,14 +96,23 @@ export function StockChart({ symbol, stockData }: StockChartProps) {
         <div className="flex items-start justify-between mb-4">
           <div>
             <h1 className="text-xl md:text-3xl font-bold mb-1 text-foreground">{longName}</h1>
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="flex items-center gap-2 text-muted-foreground flex-wrap">
               <span className="text-sm font-medium">{symbol}</span>
               <span className="text-xs">•</span>
               <span className="text-xs">{symbol.includes("SENSEX") || symbol.includes("BSE") ? "BSE" : "NSE"}</span>
-              <div className="flex items-center gap-1 text-xs">
+              <div className="flex items-center gap-1 text-xs px-2">
                 <Activity className="h-3 w-3 text-green-500" />
                 <span className="text-green-500">Live</span>
               </div>
+              <a
+                href={`https://niftynews.allytechcourses.com/company/${encodeURIComponent(symbol)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs ml-2 bg-blue-500/10 text-blue-500 border border-blue-500/20 px-2.5 py-1 rounded-full hover:bg-blue-500/20 transition-colors"
+                title="View Latest News"
+              >
+                News
+              </a>
             </div>
           </div>
         </div>

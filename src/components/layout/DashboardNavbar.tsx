@@ -7,6 +7,7 @@ import { Search, Bell, Menu, User, Settings, LogOut, LayoutDashboard, BarChart3,
 import { MarketsMenu } from "./MarketsMenu";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "../ThemeToggle";
+import { NavbarNewsMenu } from "./NavbarNewsMenu";
 
 export function DashboardNavbar() {
   const router = useRouter();
@@ -69,6 +70,15 @@ export function DashboardNavbar() {
             >
               Screener
             </Link>
+            <Link
+              href="/volume-analysis"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            >
+              Volume Analysis
+            </Link>
+            <div className="flex items-center ml-1">
+              <NavbarNewsMenu />
+            </div>
           </nav>
         </div>
 
@@ -142,6 +152,15 @@ export function DashboardNavbar() {
               >
                 <TrendingUp className="h-5 w-5 text-emerald-500" />
                 All Stocks
+              </Link>
+
+              <Link
+                href="/volume-analysis"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <BarChart3 className="h-5 w-5 text-indigo-500" />
+                Volume Analysis
               </Link>
 
               <Link

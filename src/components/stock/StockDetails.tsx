@@ -2,6 +2,7 @@
 
 import { TrendingUp, TrendingDown, DollarSign, BarChart3, Percent, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CompanyNewsCard } from "./CompanyNewsCard";
 
 interface StockDetailsProps {
   stockData: any;
@@ -138,6 +139,9 @@ export function StockDetails({ stockData }: StockDetailsProps) {
           </div>
         </div>
       )}
+
+      {/* Company News */}
+      <CompanyNewsCard symbol={stockData.symbol} companyName={stockData.longName} />
     </div>
   );
 }

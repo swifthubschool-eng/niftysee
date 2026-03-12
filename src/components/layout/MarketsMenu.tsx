@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   NavigationMenu,
@@ -116,6 +117,16 @@ const subCategories: SubCategory[] = [
       { label: "Top losers", href: "/market?filter=Top losers" },
     ]
   },
+  {
+    category_id: "news",
+    title: "Categories",
+    items: [
+      { label: "Top Stories", href: "/dashboard" },
+      { label: "Markets", href: "/market" },
+      { label: "Economy", href: "/market" },
+      { label: "Companies", href: "/screener" },
+    ]
+  },
 ];
 
 const featuredItems: FeaturedItem[] = [
@@ -150,6 +161,7 @@ const featuredItems: FeaturedItem[] = [
 export function MarketsMenu() {
   const [activeCategory, setActiveCategory] = React.useState<string>("world");
   const [marketMovers, setMarketMovers] = React.useState<any[]>([]);
+  const [newsFeed, setNewsFeed] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   const currentSubCategories = subCategories.filter(sc => sc.category_id === activeCategory);
@@ -194,7 +206,20 @@ export function MarketsMenu() {
       }
     }
 
+    async function fetchMenuNews() {
+      try {
+        const res = await fetch("/api/news");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setNewsFeed(data.data.slice(0, 5));
+        }
+      } catch (e) {
+        console.error("Failed to fetch menu news", e);
+      }
+    }
+
     fetchMarketMovers();
+    fetchMenuNews();
 
     // Refresh every minute
     const interval = setInterval(fetchMarketMovers, 60000);
@@ -276,7 +301,7 @@ export function MarketsMenu() {
               {/* Right Column: Featured Items */}
               <div className="flex-1 bg-muted/10 flex flex-col">
                 <div className="p-6 overflow-y-auto custom-scrollbar">
-                  {currentFeatured && (
+                  {currentFeatured && activeCategory !== "news" && (
                     <>
                       <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">
                         {/* Always show "Market Movers" if we have data, otherwise fallback to static title */}
@@ -320,6 +345,36 @@ export function MarketsMenu() {
                           </Link>
                         </div>
                       )}
+                    </>
+                  )}
+
+                  {activeCategory === "news" && (
+                    <>
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">
+                        Latest Headlines
+                      </h4>
+                      <div className="space-y-3">
+                        {newsFeed.length > 0 ? (
+                          newsFeed.map((item, idx) => (
+                            <a key={idx} href={item.link} target="_blank" rel="noopener noreferrer">
+                              <div className="flex flex-col p-3 rounded-xl border border-border bg-muted/20 hover:bg-muted/50 transition-all cursor-pointer group mb-3 last:mb-0">
+                                <h5 className="text-sm font-medium leading-snug text-foreground group-hover:text-blue-400 line-clamp-2 transition-colors mb-2">
+                                  {item.title}
+                                </h5>
+                                <div className="flex justify-between items-center text-[10px] text-muted-foreground font-medium">
+                                  <span className="text-blue-400/80">{item.source}</span>
+                                  <span>{item.pubDate ? formatDistanceToNow(new Date(item.pubDate), { addSuffix: true }) : ''}</span>
+                                </div>
+                              </div>
+                            </a>
+                          ))
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+                            <Activity className="h-6 w-6 mb-2 opacity-20" />
+                            <p className="text-xs">Loading news feed...</p>
+                          </div>
+                        )}
+                      </div>
                     </>
                   )}
                 </div>

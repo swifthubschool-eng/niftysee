@@ -86,7 +86,7 @@ export function TradingChart({ symbol, instrumentToken, interval, range }: Tradi
 
     const handleResize = () => {
       if (chartContainerRef.current) {
-        chart.applyOptions({ 
+        chart.applyOptions({
           width: chartContainerRef.current.clientWidth,
           height: chartContainerRef.current.clientHeight
         });
@@ -121,7 +121,7 @@ export function TradingChart({ symbol, instrumentToken, interval, range }: Tradi
           default: from.setDate(from.getDate() - 1);
         }
 
-        const res = await fetch(`/api/stocks/history?token=${instrumentToken}&interval=${interval}&from=${from.toISOString()}&to=${to.toISOString()}`);
+        const res = await fetch(`/api/stocks/history?token=${instrumentToken}&interval=${interval}&from=${from.toISOString()}&to=${to.toISOString()}&range=${range}`);
         const json = await res.json();
 
         if (json.status === "ok" && Array.isArray(json.data)) {
@@ -129,7 +129,7 @@ export function TradingChart({ symbol, instrumentToken, interval, range }: Tradi
           // For now, assume the backend is passing the string and relying on the Kite proxy.
           // Note: Kite API only supports specific intervals so production usage usually requires aggregating 1m candles.
           // We will render whatever is returned.
-          
+
           let candles = json.data.map((c: any) => {
             const d = new Date(c[0] || c.date);
             let time: Time;
@@ -148,7 +148,7 @@ export function TradingChart({ symbol, instrumentToken, interval, range }: Tradi
               volume: c[5] || c.volume
             };
           });
-          
+
           candles.sort((a: any, b: any) => {
             const getTime = (t: Time) => typeof t === 'object' ? new Date(t.year, t.month - 1, t.day).getTime() : (t as number) * 1000;
             return getTime(a.time) - getTime(b.time);
@@ -221,7 +221,7 @@ export function TradingChart({ symbol, instrumentToken, interval, range }: Tradi
             case "60minute": periodSeconds = 3600; break;
             case "4hour": periodSeconds = 14400; break;
           }
-           candleTime = (tickTime - (tickTime % periodSeconds)) as UTCTimestamp;
+          candleTime = (tickTime - (tickTime % periodSeconds)) as UTCTimestamp;
         }
 
         const isNewCandle = () => {
@@ -265,8 +265,8 @@ export function TradingChart({ symbol, instrumentToken, interval, range }: Tradi
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#131722]/60 z-10 backdrop-blur-sm">
           <div className="flex flex-col items-center">
-             <div className="w-8 h-8 rounded-full border-2 border-t-[#2962FF] border-r-[#2962FF] border-b-transparent border-l-transparent animate-spin"></div>
-             <span className="mt-4 text-sm text-gray-400 font-mono tracking-wider">LOADING DATA...</span>
+            <div className="w-8 h-8 rounded-full border-2 border-t-[#2962FF] border-r-[#2962FF] border-b-transparent border-l-transparent animate-spin"></div>
+            <span className="mt-4 text-sm text-gray-400 font-mono tracking-wider">LOADING DATA...</span>
           </div>
         </div>
       )}

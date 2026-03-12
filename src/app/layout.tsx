@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { FloatingAIButton } from "@/components/ui/FloatingAIButton";
 
 export default function RootLayout({
   children,
@@ -33,6 +34,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <FloatingAIButton />
         </ThemeProvider>
       </body>
     </html>

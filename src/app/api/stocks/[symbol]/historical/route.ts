@@ -126,16 +126,41 @@ export async function GET(
     console.log(`[Historical] ${upperSymbol} | range=${range} | from=${fromStr} | to=${toStr} | interval=${interval}`);
 
     // 3. Fetch candles from Kite
-    const historicalResponse: any = await (kite as any).getHistoricalData(
+    let historicalResponse: any = await (kite as any).getHistoricalData(
       instrumentToken,
       interval,
       fromStr,
       toStr
     );
 
-    const candles = Array.isArray(historicalResponse)
+    let candles = Array.isArray(historicalResponse)
       ? historicalResponse
       : (historicalResponse?.data?.candles || historicalResponse?.candles || []);
+
+    // ─── Holiday Fallback Logic ──────────────────────────────────────────────
+    // If today's chart is empty (e.g. market holiday) and we wanted 1d, fetch the last available day
+    if (candles.length === 0 && range === "1d") {
+      const fallbackFrom = now.subtract(7, "day").format("YYYY-MM-DD HH:mm:ss");
+      const fallbackTo = now.format("YYYY-MM-DD HH:mm:ss");
+
+      const fallbackResponse: any = await (kite as any).getHistoricalData(
+        instrumentToken,
+        "minute",
+        fallbackFrom,
+        fallbackTo
+      );
+
+      const fallbackCandles = Array.isArray(fallbackResponse)
+        ? fallbackResponse
+        : (fallbackResponse?.data?.candles || fallbackResponse?.candles || []);
+
+      if (fallbackCandles.length > 0) {
+        // Group by day and pick the latest day
+        const lastCandleDate = dayjs(fallbackCandles[fallbackCandles.length - 1][0]).tz(IST).format("YYYY-MM-DD");
+        candles = fallbackCandles.filter((c: any) => dayjs(c[0]).tz(IST).format("YYYY-MM-DD") === lastCandleDate);
+        console.log(`[Historical Fallback] Holiday detected. Using data from ${lastCandleDate} (${candles.length} candles)`);
+      }
+    }
 
     console.log(`[Historical] ${upperSymbol} → ${candles.length} candles`);
 

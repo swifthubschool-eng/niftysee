@@ -9,6 +9,7 @@ export async function GET(request: Request) {
   const interval = searchParams.get("interval") || "minute";
   const from = searchParams.get("from");
   const to = searchParams.get("to");
+  const range = searchParams.get("range");
 
   if (!token) {
     return NextResponse.json({ error: "Missing token" }, { status: 400 });
@@ -40,16 +41,39 @@ export async function GET(request: Request) {
     );
 
     // Response is typically an array of candles: [[date, open, high, low, close, volume], ...]
-    if (!Array.isArray(response)) {
-      // Handle case where it wraps in data object
-      if (response && response.data && Array.isArray(response.data.candles)) {
-        return NextResponse.json({ status: "ok", data: response.data.candles });
+    let candles = Array.isArray(response)
+      ? response
+      : (response?.data?.candles || response?.candles || []);
+
+    // ─── Holiday Fallback ────────────────────────────────────────────────────
+    if (candles.length === 0 && range === "1d") {
+      const fallbackFrom = new Date(fromDate);
+      fallbackFrom.setDate(fallbackFrom.getDate() - 7); // Fetch up to 7 days back
+
+      const fallbackResponse: any = await (kite as any).getHistoricalData(
+        token,
+        interval,
+        fallbackFrom,
+        toDate
+      );
+
+      const fallbackCandles = Array.isArray(fallbackResponse)
+        ? fallbackResponse
+        : (fallbackResponse?.data?.candles || fallbackResponse?.candles || []);
+
+      if (fallbackCandles.length > 0) {
+        const lastCandleStr = fallbackCandles[fallbackCandles.length - 1][0];
+        const lastDatePrefix = lastCandleStr.split("T")[0]; // "YYYY-MM-DD"
+        candles = fallbackCandles.filter((c: any) => c[0].startsWith(lastDatePrefix));
+        console.log(`[Proxy] Empty 1d requested. Falling back to previous trading session: ${lastDatePrefix}`);
       }
-      // If completely empty or error structure
+    }
+
+    if (!Array.isArray(candles)) {
       return NextResponse.json({ status: "error", message: "Invalid data format from Zerodha" }, { status: 502 });
     }
 
-    return NextResponse.json({ status: "ok", data: response });
+    return NextResponse.json({ status: "ok", data: candles });
   } catch (error: any) {
     console.error(`Error proxying historical data for token ${token}:`, error.message);
     return NextResponse.json(
