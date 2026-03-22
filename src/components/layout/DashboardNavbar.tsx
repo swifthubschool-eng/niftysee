@@ -70,12 +70,6 @@ export function DashboardNavbar() {
             >
               Screener
             </Link>
-            <Link
-              href="/volume-analysis"
-              className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            >
-              Volume Analysis
-            </Link>
             <div className="flex items-center ml-1">
               <NavbarNewsMenu />
             </div>
